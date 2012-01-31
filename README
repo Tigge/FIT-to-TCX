@@ -1,0 +1,4 @@
+Usage: python fittotcx.py FILE
+
+This program takes a FIT file and converts it into an TCX file and output
+the result to the standard output.
