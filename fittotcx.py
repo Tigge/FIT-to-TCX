@@ -82,7 +82,7 @@ def createSubElement(parent, tag, text=None, ns=None):
 def createDocument():
     document = createElement("TrainingCenterDatabase")
     document.set(XML_SCHEMA + "schemaLocation", SCHEMA_LOCATION)
-    document = ElementTree(document)
+    document = lxml.etree.ElementTree(document)
 
     return document
 
@@ -100,20 +100,37 @@ def addAuthor(document):
 
 
 def addTrackpoint(element, activity, trackpoint):
-    timestamp = trackpoint.get_data("timestamp")
-    pos_lat   = trackpoint.get_data("position_lat")
-    pos_long  = trackpoint.get_data("position_long")
-    distance  = trackpoint.get_data("distance")
-    altitude  = trackpoint.get_data("altitude")
-    speed     = trackpoint.get_data("speed")
-
+    timestamp  = trackpoint.get_data("timestamp")
+    pos_lat    = trackpoint.get_data("position_lat")
+    pos_long   = trackpoint.get_data("position_long")
+    distance   = trackpoint.get_data("distance")
+    altitude   = trackpoint.get_data("altitude")
+    speed      = trackpoint.get_data("speed")
+    heart_rate = trackpoint.get_data("heart_rate")
+    
     createSubElement(element, "Time", timestamp.isoformat())
-    pos = createSubElement(element, "Position")
-    createSubElement(pos, "LatitudeDegrees", str(unitconvert.semicircle_to_degrees(pos_lat)))
-    createSubElement(pos, "LongitudeDegrees", str(unitconvert.semicircle_to_degrees(pos_long)))
+    
+    if pos_lat != None and pos_long != None:
+        pos = createSubElement(element, "Position")
+        createSubElement(pos, "LatitudeDegrees", str(unitconvert.semicircle_to_degrees(pos_lat)))
+        createSubElement(pos, "LongitudeDegrees", str(unitconvert.semicircle_to_degrees(pos_long)))
+    
+    if altitude != None:
+        createSubElement(element, "AltitudeMeters", str(altitude))
+    if distance != None:
+        createSubElement(element, "DistanceMeters", str(distance))
 
-    createSubElement(element, "AltitudeMeters", str(altitude))
-    createSubElement(element, "DistanceMeters", str(distance))
+    if heart_rate != None:
+        hr = createSubElement(element, "HeartRateBpm")
+        hr.set(XML_SCHEMA + "type", "HeartRateInBeatsPerMinute_t")
+        createSubElement(hr, "Value", str(heart_rate))
+
+    if speed != None:
+        ex  = createSubElement(element, "Extensions")
+        tpx = createSubElement(element, "TPX")
+        tpx.set("xmlns", "http://www.garmin.com/xmlschemas/ActivityExtension/v2")
+        tpx.set("CadenceSensor", "Footpod")
+        createSubElement(tpx, "Speed", str(speed))
 
 def addLap(element, activity, lap):
 
@@ -180,7 +197,7 @@ def addActivity(element, activity):
 
 
 
-def convert(filename, document):
+def convert(filename):
 
     document = createDocument()
     element = createSubElement(document.getroot(), "Activities")
