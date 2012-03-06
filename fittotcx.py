@@ -47,6 +47,7 @@ NSMAP = {\
 
 LAP_TRIGGER_MAP = {\
     "manual":             "Manual", \
+    "time":               "Time", \
     "distance":           "Distance", \
     "position_start":     "Location", \
     "position_lap":       "Location", \
