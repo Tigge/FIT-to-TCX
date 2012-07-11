@@ -26,7 +26,7 @@ import sys
 import lxml.etree
 import unitconvert
 
-from fitparse import Activity
+from fitparse import Activity, FitParseError
 
 TCD_NAMESPACE = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
 TCD = "{%s}" % TCD_NAMESPACE
@@ -224,12 +224,14 @@ def main():
         printhelp()
         return 0
 
-    document = convert(sys.argv[1])
-
-    print lxml.etree.tostring(document.getroot(), pretty_print=True, \
-                              xml_declaration=True, encoding="UTF-8")
-
-    return 0
+    try:
+        document = convert(sys.argv[1])
+        print lxml.etree.tostring(document.getroot(), pretty_print=True, \
+                                  xml_declaration=True, encoding="UTF-8")
+        return 0
+    except FitParseError, e:
+        sys.stderr.write(str(e) + "\n")
+        return 1
 
 if __name__ == "__main__":
     sys.exit(main())
