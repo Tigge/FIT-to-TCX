@@ -1,3 +1,5 @@
+#!/usr/bin/python
+#
 # Fit to TCX
 #
 # Copyright (c) 2012, Gustav Tiger <gustav@tiger.name>
