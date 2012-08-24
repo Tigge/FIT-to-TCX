@@ -34,3 +34,4 @@ Local date to UTC
 '''
 def local_date_to_utc(date):
     return datetime.utcfromtimestamp(mktime(date.timetuple()))
+
