@@ -103,21 +103,21 @@ def addAuthor(document):
 
 
 def addTrackpoint(element, activity, trackpoint):
-    timestamp  = trackpoint.get_data("timestamp")
+    timestamp  = unitconvert.local_date_to_utc(trackpoint.get_data("timestamp"))
     pos_lat    = trackpoint.get_data("position_lat")
     pos_long   = trackpoint.get_data("position_long")
     distance   = trackpoint.get_data("distance")
     altitude   = trackpoint.get_data("altitude")
     speed      = trackpoint.get_data("speed")
     heart_rate = trackpoint.get_data("heart_rate")
-    
-    createSubElement(element, "Time", timestamp.isoformat())
-    
+
+    createSubElement(element, "Time", timestamp.isoformat() + "Z")
+
     if pos_lat != None and pos_long != None:
         pos = createSubElement(element, "Position")
         createSubElement(pos, "LatitudeDegrees", str(unitconvert.semicircle_to_degrees(pos_lat)))
         createSubElement(pos, "LongitudeDegrees", str(unitconvert.semicircle_to_degrees(pos_long)))
-    
+
     if altitude != None:
         createSubElement(element, "AltitudeMeters", str(altitude))
     if distance != None:
@@ -137,8 +137,8 @@ def addTrackpoint(element, activity, trackpoint):
 
 def addLap(element, activity, lap):
 
-    start_time = lap.get_data("start_time")
-    end_time   = lap.get_data("timestamp")
+    start_time = unitconvert.local_date_to_utc(lap.get_data("start_time"))
+    end_time   = unitconvert.local_date_to_utc(lap.get_data("timestamp"))
 
     totaltime  = lap.get_data("total_elapsed_time")
     distance   = lap.get_data("total_distance")
@@ -157,7 +157,7 @@ def addLap(element, activity, lap):
     #extensions
 
     lapelem = createSubElement(element, "Lap")
-    lapelem.set("StartTime", start_time.isoformat())
+    lapelem.set("StartTime", start_time.isoformat() + "Z")
 
 
     createSubElement(lapelem, "TotalTimeSeconds", str(totaltime))
@@ -187,8 +187,8 @@ def addActivity(element, activity):
     sport = session.get_data("sport")
     sport_mapping = {"running": "Running", "cycling": "Biking"}
     sport = sport_mapping[sport] if sport in sport_mapping else "Other"
-    # Identity
-    identity = session.get_data("start_time")
+    # Identity (in UTC)
+    identity = unitconvert.local_date_to_utc(session.get_data("start_time"))
 
 
     actelem = createSubElement(element, "Activity")
