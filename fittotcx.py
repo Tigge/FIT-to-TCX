@@ -173,7 +173,7 @@ def addLap(element, activity, lap):
     # Add track points to lap
     trackelem = createSubElement(lapelem, "Track")
     for trackpoint in activity.get_records_by_type('record'):
-        dt = trackpoint.get_data("timestamp")
+        dt = unitconvert.local_date_to_utc(trackpoint.get_data("timestamp"))
         if dt >= start_time and dt <= end_time:
             trackpointelem = createSubElement(trackelem, "Trackpoint")
             addTrackpoint(trackpointelem, activity, trackpoint)
