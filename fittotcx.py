@@ -111,6 +111,7 @@ def add_trackpoint(element, trackpoint):
     altitude   = trackpoint.get_data("altitude")
     speed      = trackpoint.get_data("speed")
     heart_rate = trackpoint.get_data("heart_rate")
+    cadence    = trackpoint.get_data("cadence")
 
     create_sub_element(element, "Time", timestamp.isoformat() + "Z")
 
@@ -130,6 +131,9 @@ def add_trackpoint(element, trackpoint):
         heartrateelem = create_sub_element(element, "HeartRateBpm")
         heartrateelem.set(XML_SCHEMA + "type", "HeartRateInBeatsPerMinute_t")
         create_sub_element(heartrateelem, "Value", str(heart_rate))
+
+    if cadence != None:
+        create_sub_element(element, "Cadence", str(cadence))
 
     if speed != None:
         exelem  = create_sub_element(element, "Extensions")
@@ -154,7 +158,7 @@ def add_lap(element, activity, lap):
 
     intensity  = INTENSITY_MAP[lap.get_data("intensity")]
 
-    #cadence    = #opt
+    cadence    = lap.get_data("avg_cadence") # XXX: or max?
 
     triggermet = LAP_TRIGGER_MAP[lap.get_data("lap_trigger")]
 
@@ -167,11 +171,12 @@ def add_lap(element, activity, lap):
     create_sub_element(lapelem, "TotalTimeSeconds", str(totaltime))
     create_sub_element(lapelem, "DistanceMeters", str(distance))
     create_sub_element(lapelem, "MaximumSpeed", str(max_speed))
-    #createSubElement(lapelem, "Cadence", cadence)
     create_sub_element(lapelem, "Calories", str(calories))
     #create_sub_element(lapelem, "AverageHeartRateBpm", avg_heart)
     #create_sub_element(lapelem, "MaximumHeartRateBpm", max_heart)
     create_sub_element(lapelem, "Intensity", intensity)
+    if cadence != None:
+        create_sub_element(lapelem, "Cadence", str(cadence))
     create_sub_element(lapelem, "TriggerMethod", triggermet)
 
     # Add track points to lap
