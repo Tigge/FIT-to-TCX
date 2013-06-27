@@ -113,18 +113,18 @@ def add_trackpoint(element, trackpoint):
     heart_rate = trackpoint.get_data("heart_rate")
     cadence    = trackpoint.get_data("cadence")
 
-    create_sub_element(element, "Time", timestamp.isoformat() + "Z")
+    create_sub_element(element, "Time", timestamp.isoformat())
 
     if pos_lat != None and pos_long != None:
         pos = create_sub_element(element, "Position")
-        create_sub_element(pos, "LatitudeDegrees", 
+        create_sub_element(pos, "LatitudeDegrees",
             str(unitconvert.semicircle_to_degrees(pos_lat)))
         create_sub_element(pos, "LongitudeDegrees",
             str(unitconvert.semicircle_to_degrees(pos_long)))
 
     if altitude != None:
         create_sub_element(element, "AltitudeMeters", str(altitude))
-    if distance != None:    
+    if distance != None:
         create_sub_element(element, "DistanceMeters", str(distance))
 
     if heart_rate != None:
@@ -138,7 +138,7 @@ def add_trackpoint(element, trackpoint):
     if speed != None:
         exelem  = create_sub_element(element, "Extensions")
         tpx = create_sub_element(exelem, "TPX")
-        tpx.set("xmlns", 
+        tpx.set("xmlns",
             "http://www.garmin.com/xmlschemas/ActivityExtension/v2")
         tpx.set("CadenceSensor", "Footpod")
         create_sub_element(tpx, "Speed", str(speed))
@@ -165,7 +165,7 @@ def add_lap(element, activity, lap):
     #extensions
 
     lapelem = create_sub_element(element, "Lap")
-    lapelem.set("StartTime", start_time.isoformat() + "Z")
+    lapelem.set("StartTime", start_time.isoformat())
 
 
     create_sub_element(lapelem, "TotalTimeSeconds", str(totaltime))
@@ -202,7 +202,7 @@ def add_activity(element, activity):
 
     actelem = create_sub_element(element, "Activity")
     actelem.set("Sport", sport)
-    create_sub_element(actelem, "Id", identity.isoformat() + "Z")
+    create_sub_element(actelem, "Id", identity.isoformat())
 
     for lap in activity.get_records_by_type('lap'):
         add_lap(actelem, activity, lap)
