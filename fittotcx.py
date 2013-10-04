@@ -24,8 +24,10 @@
 
 """Convert a FIT file to a TCX file"""
 
-import sys
 import lxml.etree
+import os
+import sys
+sys.path.append(os.path.dirname(__file__))
 import unitconvert
 
 from fitparse import Activity, FitParseError
