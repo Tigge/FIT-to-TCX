@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# FIT to TCX distutils setup script
+# FIT to TCX tests
 #
 # Copyright (c) 2012, Gustav Tiger <gustav@tiger.name>
 #
@@ -22,39 +20,16 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, division, print_function
 
-from setuptools import setup
+import fittotcx.program as f2t
+import unittest
+import gzip
 
-try:
-    with open('README.md') as file:
-        long_description = file.read()
-except IOError:
-    long_description = ''
+class Simple(unittest.TestCase):
 
-setup(name='fit-to-tcx',
-      version='0.1',
+    def test_convert(self):
+        converted = f2t.documenttostring(f2t.convert("tests/test.fit"))
+        result = gzip.open("tests/test.tcx.gz").read()
+        self.assertEqual(converted, result)
 
-      description='FIT to TCX',
-      long_description=long_description,
-
-      author='Gustav Tiger',
-      author_email='gustav@tiger.name',
-
-      packages=['fittotcx'],
-      entry_points={
-          'console_scripts': ['fittotcx=fittotcx.program:main']
-      },
-
-      url='https://github.com/Tigge/FIT-to-TCX',
-
-      classifiers=['Development Status :: 5 - Production/Stable',
-                   'Intended Audience :: Developers',
-                   'Intended Audience :: End Users/Desktop',
-                   'Intended Audience :: Healthcare Industry',
-                   'License :: OSI Approved :: MIT License',
-                   'Programming Language :: Python :: 2.7'],
-
-      install_requires=['lxml'],
-
-      test_suite='tests')

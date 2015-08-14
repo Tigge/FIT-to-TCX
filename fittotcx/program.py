@@ -222,6 +222,9 @@ def convert(filename):
 
     return document
 
+def documenttostring(document):
+    return lxml.etree.tostring(document.getroot(), pretty_print=True,
+                               xml_declaration=True, encoding="UTF-8")
 
 def printhelp():
     print("usage: python", sys.argv[0], "FILE")
@@ -237,8 +240,7 @@ def main():
 
     try:
         document = convert(sys.argv[1])
-        print(lxml.etree.tostring(document.getroot(), pretty_print=True, \
-                                  xml_declaration=True, encoding="UTF-8"))
+        sys.stdout.write(documenttostring(document))
         return 0
     except FitParseError as exception:
         sys.stderr.write(str(exception) + "\n")
