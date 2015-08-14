@@ -1,4 +1,6 @@
-# Unit conversions
+#!/usr/bin/env python
+#
+# FIT to TCX distutils setup script
 #
 # Copyright (c) 2012, Gustav Tiger <gustav@tiger.name>
 #
@@ -20,16 +22,37 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-"""Unit conversions"""
+from __future__ import absolute_import, print_function
 
-from time import mktime
-from datetime import datetime
+from setuptools import setup
 
-def semicircle_to_degrees(semicircles):
-    """Convert a number in semicricles to degrees"""
-    return semicircles * (180.0 / 2.0 ** 31)
+try:
+    with open('README.md') as file:
+        long_description = file.read()
+except IOError:
+    long_description = ''
 
-def local_date_to_utc(date):
-    """Local date to UTC"""
-    return datetime.utcfromtimestamp(mktime(date.timetuple()))
+setup(name='fit-to-tcx',
+      version='0.1',
 
+      description='FIT to TCX',
+      long_description=long_description,
+
+      author='Gustav Tiger',
+      author_email='gustav@tiger.name',
+
+      packages=['fittotcx'],
+      entry_points={
+          'console_scripts': ['fittotcx=fittotcx.program:main']
+      },
+
+      url='https://github.com/Tigge/FIT-to-TCX',
+
+      classifiers=['Development Status :: 5 - Production/Stable',
+                   'Intended Audience :: Developers',
+                   'Intended Audience :: End Users/Desktop',
+                   'Intended Audience :: Healthcare Industry',
+                   'License :: OSI Approved :: MIT License',
+                   'Programming Language :: Python :: 2.7'],
+
+      install_requires=['lxml'])

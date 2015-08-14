@@ -24,9 +24,11 @@
 
 """Convert a FIT file to a TCX file"""
 
+from __future__ import absolute_import, division, print_function
+
 import sys
 import lxml.etree
-import unitconvert
+from . import unitconvert
 
 from fitparse import Activity, FitParseError
 
@@ -222,10 +224,10 @@ def convert(filename):
 
 
 def printhelp():
-    print "usage: python" + sys.argv[0] + " FILE"
-    print ""
-    print "This program takes a FIT file and converts it into an TCX file" + \
-          "and output the result to the standard output."
+    print("usage: python", sys.argv[0], "FILE")
+    print("")
+    print("This program takes a FIT file and converts it into an TCX file" + \
+          "and output the result to the standard output.")
 
 def main():
 
@@ -235,10 +237,10 @@ def main():
 
     try:
         document = convert(sys.argv[1])
-        print lxml.etree.tostring(document.getroot(), pretty_print=True, \
-                                  xml_declaration=True, encoding="UTF-8")
+        print(lxml.etree.tostring(document.getroot(), pretty_print=True, \
+                                  xml_declaration=True, encoding="UTF-8"))
         return 0
-    except FitParseError, exception:
+    except FitParseError as exception:
         sys.stderr.write(str(exception) + "\n")
         return 1
 
