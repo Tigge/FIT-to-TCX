@@ -1,6 +1,9 @@
 FIT to TCX
 ==========
 
+[![Travis branch](https://img.shields.io/travis/Tigge/FIT-to-TCX/master.svg)](https://travis-ci.org/Tigge/FIT-to-TCX)
+[![Coveralls branch](https://img.shields.io/coveralls/Tigge/FIT-to-TCX/master.svg)](https://coveralls.io/r/Tigge/FIT-to-TCX?branch=master)
+
 Requirements
 ------------
 
