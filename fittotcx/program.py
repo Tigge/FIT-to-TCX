@@ -67,8 +67,11 @@ INTENSITY_MAP = {\
     "active":             "Active", \
     "warmup":             "Active", \
     "cooldown":           "Active", \
-    "rest":               "Resting", \
-    None:                 "Resting"}
+    "rest":               "Resting"}
+
+SPORT_MAP = {\
+    "running":            "Running", \
+    "cycling":            "Biking"}
 
 
 def create_element(tag, text=None, namespace=None):
@@ -158,11 +161,11 @@ def add_lap(element, activity, lap):
     #avg_heart  = lap.get_data("avg_heart_rate") #opt
     #max_heart  = lap.get_data("max_heart_rate") #opt
 
-    intensity  = INTENSITY_MAP[lap.get_data("intensity")]
+    intensity  = INTENSITY_MAP.get(lap.get_data("intensity"), "Resting")
 
     cadence    = lap.get_data("avg_cadence") # XXX: or max?
 
-    triggermet = LAP_TRIGGER_MAP[lap.get_data("lap_trigger")]
+    triggermet = LAP_TRIGGER_MAP.get(lap.get_data("lap_trigger"), "Manual")
 
     #extensions
 
@@ -195,9 +198,7 @@ def add_activity(element, activity):
     session = next(activity.get_records_by_type('session'))
 
     # Sport type
-    sport = session.get_data("sport")
-    sport_mapping = {"running": "Running", "cycling": "Biking"}
-    sport = sport_mapping[sport] if sport in sport_mapping else "Other"
+    sport = SPORT_MAP.get(session.get_data("sport"), "Other")
     # Identity (in UTC)
     identity = unitconvert.local_date_to_utc(session.get_data("start_time"))
 
