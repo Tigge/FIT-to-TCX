@@ -1,1 +1,1 @@
-for f in "$@" ; do python fittotcx.py "$f" > "${f%.fit}.tcx" ; done
+for f in "$@" ; do fittotcx "$f" > "${f%.fit}.tcx" ; done
