@@ -46,43 +46,44 @@ SCHEMA_LOCATION = \
     "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 " + \
     "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd"
 
-NSMAP = {\
-    None : TCD_NAMESPACE, \
+NSMAP = {
+    None: TCD_NAMESPACE,
     "xsi": XML_SCHEMA_NAMESPACE}
 
 # FIT to TCX values mapping
 
-LAP_TRIGGER_MAP = {\
-    "manual":             "Manual", \
-    "time":               "Time", \
-    "distance":           "Distance", \
-    "position_start":     "Location", \
-    "position_lap":       "Location", \
-    "position_waypoint":  "Location", \
-    "position_marked":    "Location", \
-    "session_end":        "Manual", \
-    "fitness_equipment":  "Manual"}
+LAP_TRIGGER_MAP = {
+    "manual": "Manual",
+    "time": "Time",
+    "distance": "Distance",
+    "position_start": "Location",
+    "position_lap": "Location",
+    "position_waypoint": "Location",
+    "position_marked": "Location",
+    "session_end": "Manual",
+    "fitness_equipment": "Manual"}
 
-INTENSITY_MAP = {\
-    "active":             "Active", \
-    "warmup":             "Active", \
-    "cooldown":           "Active", \
-    "rest":               "Resting"}
+INTENSITY_MAP = {
+    "active": "Active",
+    "warmup": "Active",
+    "cooldown": "Active",
+    "rest": "Resting"}
 
-SPORT_MAP = {\
-    "running":            "Running", \
-    "cycling":            "Biking"}
+SPORT_MAP = {
+    "running": "Running",
+    "cycling": "Biking"}
 
 
 def create_element(tag, text=None, namespace=None):
     namespace = NSMAP[namespace]
-    tag       = "{%s}%s" % (namespace, tag)
-    element   = lxml.etree.Element(tag, nsmap=NSMAP)
+    tag = "{%s}%s" % (namespace, tag)
+    element = lxml.etree.Element(tag, nsmap=NSMAP)
 
-    if text != None:
+    if text is not None:
         element.text = text
 
     return element
+
 
 def create_sub_element(parent, tag, text=None, namespace=None):
     element = create_element(tag, text, namespace)
@@ -98,7 +99,6 @@ def create_document():
     return document
 
 
-
 def add_author(document):
     """Add author"""
     author = create_sub_element(document.getroot(), "Author")
@@ -107,80 +107,78 @@ def add_author(document):
     create_sub_element(author, "LangID", "EN")
 
 
-
 def add_trackpoint(element, trackpoint):
-    timestamp  = unitconvert.local_date_to_utc(trackpoint.get_data("timestamp"))
-    pos_lat    = trackpoint.get_data("position_lat")
-    pos_long   = trackpoint.get_data("position_long")
-    distance   = trackpoint.get_data("distance")
-    altitude   = trackpoint.get_data("altitude")
-    speed      = trackpoint.get_data("speed")
+    timestamp = unitconvert.local_date_to_utc(trackpoint.get_data("timestamp"))
+    pos_lat = trackpoint.get_data("position_lat")
+    pos_long = trackpoint.get_data("position_long")
+    distance = trackpoint.get_data("distance")
+    altitude = trackpoint.get_data("altitude")
+    speed = trackpoint.get_data("speed")
     heart_rate = trackpoint.get_data("heart_rate")
-    cadence    = trackpoint.get_data("cadence")
+    cadence = trackpoint.get_data("cadence")
 
     create_sub_element(element, "Time", timestamp.isoformat() + "Z")
 
-    if pos_lat != None and pos_long != None:
+    if pos_lat is not None and pos_long is not None:
         pos = create_sub_element(element, "Position")
-        create_sub_element(pos, "LatitudeDegrees", 
-            str(unitconvert.semicircle_to_degrees(pos_lat)))
+        create_sub_element(pos, "LatitudeDegrees",
+                           str(unitconvert.semicircle_to_degrees(pos_lat)))
         create_sub_element(pos, "LongitudeDegrees",
-            str(unitconvert.semicircle_to_degrees(pos_long)))
+                           str(unitconvert.semicircle_to_degrees(pos_long)))
 
-    if altitude != None:
+    if altitude is not None:
         create_sub_element(element, "AltitudeMeters", str(altitude))
-    if distance != None:    
+    if distance is not None:
         create_sub_element(element, "DistanceMeters", str(distance))
 
-    if heart_rate != None:
+    if heart_rate is not None:
         heartrateelem = create_sub_element(element, "HeartRateBpm")
         heartrateelem.set(XML_SCHEMA + "type", "HeartRateInBeatsPerMinute_t")
         create_sub_element(heartrateelem, "Value", str(heart_rate))
 
-    if cadence != None:
+    if cadence is not None:
         create_sub_element(element, "Cadence", str(cadence))
 
-    if speed != None:
-        exelem  = create_sub_element(element, "Extensions")
+    if speed is not None:
+        exelem = create_sub_element(element, "Extensions")
         tpx = create_sub_element(exelem, "TPX")
-        tpx.set("xmlns", 
-            "http://www.garmin.com/xmlschemas/ActivityExtension/v2")
+        tpx.set("xmlns",
+                "http://www.garmin.com/xmlschemas/ActivityExtension/v2")
         tpx.set("CadenceSensor", "Footpod")
         create_sub_element(tpx, "Speed", str(speed))
 
+
 def add_lap(element, activity, lap):
-
     start_time = unitconvert.local_date_to_utc(lap.get_data("start_time"))
-    end_time   = unitconvert.local_date_to_utc(lap.get_data("timestamp"))
+    end_time = unitconvert.local_date_to_utc(lap.get_data("timestamp"))
 
-    totaltime  = lap.get_data("total_elapsed_time")
-    distance   = lap.get_data("total_distance")
-    max_speed  = lap.get_data("max_speed") # opt
-    calories   = lap.get_data("total_calories")
+    totaltime = lap.get_data("total_elapsed_time")
+    distance = lap.get_data("total_distance")
+    max_speed = lap.get_data("max_speed")  # opt
+    calories = lap.get_data("total_calories")
 
-    #avg_heart  = lap.get_data("avg_heart_rate") #opt
-    #max_heart  = lap.get_data("max_heart_rate") #opt
+    # avg_heart  = lap.get_data("avg_heart_rate") #opt
+    # max_heart  = lap.get_data("max_heart_rate") #opt
 
-    intensity  = INTENSITY_MAP.get(lap.get_data("intensity"), "Resting")
+    intensity = INTENSITY_MAP.get(lap.get_data("intensity"), "Resting")
 
-    cadence    = lap.get_data("avg_cadence") # XXX: or max?
+    cadence = lap.get_data("avg_cadence")  # XXX: or max?
 
     triggermet = LAP_TRIGGER_MAP.get(lap.get_data("lap_trigger"), "Manual")
 
-    #extensions
+    # extensions
 
     lapelem = create_sub_element(element, "Lap")
     lapelem.set("StartTime", start_time.isoformat() + "Z")
-
 
     create_sub_element(lapelem, "TotalTimeSeconds", str(totaltime))
     create_sub_element(lapelem, "DistanceMeters", str(distance))
     create_sub_element(lapelem, "MaximumSpeed", str(max_speed))
     create_sub_element(lapelem, "Calories", str(calories))
-    #create_sub_element(lapelem, "AverageHeartRateBpm", avg_heart)
-    #create_sub_element(lapelem, "MaximumHeartRateBpm", max_heart)
+    # create_sub_element(lapelem, "AverageHeartRateBpm", avg_heart)
+    # create_sub_element(lapelem, "MaximumHeartRateBpm", max_heart)
     create_sub_element(lapelem, "Intensity", intensity)
-    if cadence != None:
+    if cadence is not None:
         create_sub_element(lapelem, "Cadence", str(cadence))
     create_sub_element(lapelem, "TriggerMethod", triggermet)
 
@@ -188,20 +186,18 @@ def add_lap(element, activity, lap):
     trackelem = create_sub_element(lapelem, "Track")
     for trackpoint in activity.get_records_by_type('record'):
         tts = unitconvert.local_date_to_utc(trackpoint.get_data("timestamp"))
-        if tts >= start_time and tts <= end_time:
+        if start_time <= tts <= end_time:
             trackpointelem = create_sub_element(trackelem, "Trackpoint")
             add_trackpoint(trackpointelem, trackpoint)
 
 
 def add_activity(element, activity):
-
     session = next(activity.get_records_by_type('session'))
 
     # Sport type
     sport = SPORT_MAP.get(session.get_data("sport"), "Other")
     # Identity (in UTC)
     identity = unitconvert.local_date_to_utc(session.get_data("start_time"))
-
 
     actelem = create_sub_element(element, "Activity")
     actelem.set("Sport", sport)
@@ -211,9 +207,7 @@ def add_activity(element, activity):
         add_lap(actelem, activity, lap)
 
 
-
 def convert(filename):
-
     document = create_document()
     element = create_sub_element(document.getroot(), "Activities")
 
@@ -223,18 +217,20 @@ def convert(filename):
 
     return document
 
+
 def documenttostring(document):
     return lxml.etree.tostring(document.getroot(), pretty_print=True,
                                xml_declaration=True, encoding="UTF-8")
 
+
 def printhelp():
     print("usage: python", sys.argv[0], "FILE")
     print("")
-    print("This program takes a FIT file and converts it into an TCX file" + \
+    print("This program takes a FIT file and converts it into an TCX file" +
           "and output the result to the standard output.")
 
-def main():
 
+def main():
     if len(sys.argv) == 1:
         printhelp()
         return 0
@@ -247,6 +243,6 @@ def main():
         sys.stderr.write(str(exception) + "\n")
         return 1
 
+
 if __name__ == "__main__":
     sys.exit(main())
-
