@@ -26,6 +26,7 @@
 
 from __future__ import absolute_import, division, print_function
 
+import argparse
 import sys
 import lxml.etree
 from . import unitconvert
@@ -223,17 +224,13 @@ def documenttostring(document):
                                xml_declaration=True, encoding="UTF-8")
 
 
-def printhelp():
-    print("usage: python", sys.argv[0], "FILE")
-    print("")
-    print("This program takes a FIT file and converts it into an TCX file" +
-          "and output the result to the standard output.")
-
-
 def main():
-    if len(sys.argv) == 1:
-        printhelp()
-        return 0
+    parser = argparse.ArgumentParser(
+            description="This program takes a FIT file and converts it " +
+                        "into an TCX file and output the result to the " +
+                        "standard output.")
+    parser.add_argument('file', metavar='FILE', type=argparse.FileType('r'))
+    args = parser.parse_args()
 
     try:
         document = convert(sys.argv[1])
