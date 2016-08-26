@@ -26,10 +26,10 @@ import fittotcx.program as f2t
 import unittest
 import gzip
 
+
 class Simple(unittest.TestCase):
 
     def test_convert(self):
         converted = f2t.documenttostring(f2t.convert("tests/test.fit"))
         result = gzip.open("tests/test.tcx.gz").read()
         self.assertEqual(converted, result)
-

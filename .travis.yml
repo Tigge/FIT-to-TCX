@@ -11,6 +11,7 @@ install:
 script:
   - coverage run --source=fittotcx setup.py test
   - python setup.py install
-  - fittotcx
+  - python setup.py test
+  - fittotcx tests/test.fit > /dev/null
 after_success:
   - coveralls
