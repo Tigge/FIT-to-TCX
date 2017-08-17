@@ -2,12 +2,12 @@ language: python
 sudo: false
 python:
   - 2.7
-  - pypy
+  - 3.3
+  - 3.4
+  - 3.5
+  - 3.6
 install:
-  - pip install -r requirements.txt
   - pip install coveralls
-  - git clone https://github.com/dtcooper/python-fitparse.git
-  - cp -R python-fitparse/fitparse `python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"`
 script:
   - coverage run --source=fittotcx setup.py test
   - python setup.py install

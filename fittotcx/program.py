@@ -31,7 +31,7 @@ import sys
 import lxml.etree
 from . import unitconvert
 
-from fitparse import Activity, FitParseError
+from fitparse import FitFile, FitParseError
 
 TCD_NAMESPACE = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
 TCD = "{%s}" % TCD_NAMESPACE
@@ -75,6 +75,10 @@ SPORT_MAP = {
     "cycling": "Biking"}
 
 
+def ff(number):
+    return '{:.10f}'.format(number).rstrip('0').rstrip('.')
+
+
 def create_element(tag, text=None, namespace=None):
     namespace = NSMAP[namespace]
     tag = "{%s}%s" % (namespace, tag)
@@ -109,36 +113,36 @@ def add_author(document):
 
 
 def add_trackpoint(element, trackpoint):
-    timestamp = unitconvert.local_date_to_utc(trackpoint.get_data("timestamp"))
-    pos_lat = trackpoint.get_data("position_lat")
-    pos_long = trackpoint.get_data("position_long")
-    distance = trackpoint.get_data("distance")
-    altitude = trackpoint.get_data("altitude")
-    speed = trackpoint.get_data("speed")
-    heart_rate = trackpoint.get_data("heart_rate")
-    cadence = trackpoint.get_data("cadence")
+    timestamp = trackpoint.get_value("timestamp")
+    pos_lat = trackpoint.get_value("position_lat")
+    pos_long = trackpoint.get_value("position_long")
+    distance = trackpoint.get_value("distance")
+    altitude = trackpoint.get_value("altitude")
+    speed = trackpoint.get_value("speed")
+    heart_rate = trackpoint.get_value("heart_rate")
+    cadence = trackpoint.get_value("cadence")
 
     create_sub_element(element, "Time", timestamp.isoformat() + "Z")
 
     if pos_lat is not None and pos_long is not None:
         pos = create_sub_element(element, "Position")
         create_sub_element(pos, "LatitudeDegrees",
-                           str(unitconvert.semicircle_to_degrees(pos_lat)))
+                           ff(unitconvert.semicircle_to_degrees(pos_lat)))
         create_sub_element(pos, "LongitudeDegrees",
-                           str(unitconvert.semicircle_to_degrees(pos_long)))
+                           ff(unitconvert.semicircle_to_degrees(pos_long)))
 
     if altitude is not None:
-        create_sub_element(element, "AltitudeMeters", str(altitude))
+        create_sub_element(element, "AltitudeMeters", ff(altitude))
     if distance is not None:
-        create_sub_element(element, "DistanceMeters", str(distance))
+        create_sub_element(element, "DistanceMeters", ff(distance))
 
     if heart_rate is not None:
         heartrateelem = create_sub_element(element, "HeartRateBpm")
         heartrateelem.set(XML_SCHEMA + "type", "HeartRateInBeatsPerMinute_t")
-        create_sub_element(heartrateelem, "Value", str(heart_rate))
+        create_sub_element(heartrateelem, "Value", ff(heart_rate))
 
     if cadence is not None:
-        create_sub_element(element, "Cadence", str(cadence))
+        create_sub_element(element, "Cadence", ff(cadence))
 
     if speed is not None:
         exelem = create_sub_element(element, "Extensions")
@@ -146,65 +150,66 @@ def add_trackpoint(element, trackpoint):
         tpx.set("xmlns",
                 "http://www.garmin.com/xmlschemas/ActivityExtension/v2")
         tpx.set("CadenceSensor", "Footpod")
-        create_sub_element(tpx, "Speed", str(speed))
+        create_sub_element(tpx, "Speed", ff(speed))
 
 
 def add_lap(element, activity, lap):
-    start_time = unitconvert.local_date_to_utc(lap.get_data("start_time"))
-    end_time = unitconvert.local_date_to_utc(lap.get_data("timestamp"))
+    start_time = lap.get_value("start_time")
+    end_time = lap.get_value("timestamp")
 
-    totaltime = lap.get_data("total_elapsed_time")
-    distance = lap.get_data("total_distance")
-    max_speed = lap.get_data("max_speed")  # opt
-    calories = lap.get_data("total_calories")
+    totaltime = lap.get_value("total_elapsed_time")
+    distance = lap.get_value("total_distance")
+    max_speed = lap.get_value("max_speed")  # opt
+    calories = lap.get_value("total_calories")
 
-    # avg_heart  = lap.get_data("avg_heart_rate") #opt
-    # max_heart  = lap.get_data("max_heart_rate") #opt
+    # avg_heart  = lap.get_value("avg_heart_rate") #opt
+    # max_heart  = lap.get_value("max_heart_rate") #opt
 
-    intensity = INTENSITY_MAP.get(lap.get_data("intensity"), "Resting")
+    intensity = INTENSITY_MAP.get(lap.get_value("intensity"), "Resting")
 
-    cadence = lap.get_data("avg_cadence")  # XXX: or max?
+    cadence = lap.get_value("avg_cadence")  # XXX: or max?
 
-    triggermet = LAP_TRIGGER_MAP.get(lap.get_data("lap_trigger"), "Manual")
+    triggermet = LAP_TRIGGER_MAP.get(lap.get_value("lap_trigger"), "Manual")
 
     # extensions
 
     lapelem = create_sub_element(element, "Lap")
     lapelem.set("StartTime", start_time.isoformat() + "Z")
 
-    create_sub_element(lapelem, "TotalTimeSeconds", str(totaltime))
-    create_sub_element(lapelem, "DistanceMeters", str(distance))
-    create_sub_element(lapelem, "MaximumSpeed", str(max_speed))
-    create_sub_element(lapelem, "Calories", str(calories))
+    create_sub_element(lapelem, "TotalTimeSeconds", ff(totaltime))
+    create_sub_element(lapelem, "DistanceMeters", ff(distance))
+    create_sub_element(lapelem, "MaximumSpeed", ff(max_speed))
+    create_sub_element(lapelem, "Calories", ff(calories))
     # create_sub_element(lapelem, "AverageHeartRateBpm", avg_heart)
     # create_sub_element(lapelem, "MaximumHeartRateBpm", max_heart)
     create_sub_element(lapelem, "Intensity", intensity)
     if cadence is not None:
-        create_sub_element(lapelem, "Cadence", str(cadence))
+        create_sub_element(lapelem, "Cadence", ff(cadence))
     create_sub_element(lapelem, "TriggerMethod", triggermet)
 
     # Add track points to lap
     trackelem = create_sub_element(lapelem, "Track")
-    for trackpoint in activity.get_records_by_type('record'):
-        tts = unitconvert.local_date_to_utc(trackpoint.get_data("timestamp"))
+    for trackpoint in activity.get_messages(name="record"):
+        tts = trackpoint.get_value("timestamp")
         if start_time <= tts <= end_time:
             trackpointelem = create_sub_element(trackelem, "Trackpoint")
             add_trackpoint(trackpointelem, trackpoint)
 
 
 def add_activity(element, activity):
-    session = next(activity.get_records_by_type('session'))
+    session = next(activity.get_messages(name='session'))
 
     # Sport type
-    sport = SPORT_MAP.get(session.get_data("sport"), "Other")
+    sport = SPORT_MAP.get(session.get_value("sport"), "Other")
+
     # Identity (in UTC)
-    identity = unitconvert.local_date_to_utc(session.get_data("start_time"))
+    identity = session.get_value("start_time")
 
     actelem = create_sub_element(element, "Activity")
     actelem.set("Sport", sport)
     create_sub_element(actelem, "Id", identity.isoformat() + "Z")
 
-    for lap in activity.get_records_by_type('lap'):
+    for lap in activity.get_messages("lap"):
         add_lap(actelem, activity, lap)
 
 
@@ -212,7 +217,7 @@ def convert(filename):
     document = create_document()
     element = create_sub_element(document.getroot(), "Activities")
 
-    activity = Activity(filename)
+    activity = FitFile(filename)
     activity.parse()
     add_activity(element, activity)
 
@@ -234,7 +239,7 @@ def main():
 
     try:
         document = convert(sys.argv[1])
-        sys.stdout.write(documenttostring(document))
+        sys.stdout.write(documenttostring(document).decode('utf-8'))
         return 0
     except FitParseError as exception:
         sys.stderr.write(str(exception) + "\n")

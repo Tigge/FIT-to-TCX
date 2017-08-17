@@ -10,15 +10,8 @@ Requirements
 - python-fitparse -- A library to parse FIT files by David Cooper. You can get
   it from GitHub at <https://github.com/dtcooper/python-fitparse>.
 
-  Unfortunately this library don't have a setup.py file yet, and is not
-  available through PyPI.
-
-  You can install it manually like this:
-
-  `git clone https://github.com/dtcooper/python-fitparse`
-  `cp -R python-fitparse/fitparse /usr/local/lib/pythonX.Y/site-packages`
-
-  Replace X.Y with your python version.
+  This library is marked as a dependency so using the installation instructions
+  below should bring in this if you don't have it.
 
 - python-lxml -- A library for reading and writing XML files. It uses the
   C libraries libxml2 and libxslt.

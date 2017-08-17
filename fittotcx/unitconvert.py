@@ -31,8 +31,3 @@ from datetime import datetime
 def semicircle_to_degrees(semicircles):
     """Convert a number in semicricles to degrees"""
     return semicircles * (180.0 / 2.0 ** 31)
-
-
-def local_date_to_utc(date):
-    """Local date to UTC"""
-    return datetime.utcfromtimestamp(mktime(date.timetuple()))

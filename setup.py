@@ -55,6 +55,7 @@ setup(name='fit-to-tcx',
                    'License :: OSI Approved :: MIT License',
                    'Programming Language :: Python :: 2.7'],
 
-      install_requires=['lxml'],
+      dependency_links=['git+https://github.com/dtcooper/python-fitparse.git#egg=fitparse-0.0.1-dev0'],
+      install_requires=['lxml', 'fitparse>=0.0.1-dev0'],
 
       test_suite='tests')
