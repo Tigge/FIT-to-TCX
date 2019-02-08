@@ -29,7 +29,7 @@ from __future__ import absolute_import, division, print_function
 import argparse
 import sys
 import lxml.etree
-from . import unitconvert
+from fittotcx import unitconvert
 
 from fitparse import FitFile, FitParseError
 
@@ -234,12 +234,17 @@ def main():
             description="This program takes a FIT file and converts it " +
                         "into an TCX file and output the result to the " +
                         "standard output.")
-    parser.add_argument('file', metavar='FILE', type=argparse.FileType('r'))
+    parser.add_argument('inputfile', metavar='INPUTFILE', nargs=1, type=str)
+    parser.add_argument('outputfile', metavar='OUTPUTFILE', nargs='?', type=str, default=None)
     args = parser.parse_args()
 
     try:
-        document = convert(sys.argv[1])
-        sys.stdout.write(documenttostring(document).decode('utf-8'))
+        document = convert(args.inputfile[0])
+        if args.outputfile:
+            with open(args.outputfile, 'wb') as f:
+                f.write(documenttostring(document))
+        else:
+            print(documenttostring(document).decode('utf-8'))
         return 0
     except FitParseError as exception:
         sys.stderr.write(str(exception) + "\n")
