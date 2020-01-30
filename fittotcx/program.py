@@ -158,6 +158,8 @@ def add_lap(element, activity, lap):
     end_time = lap.get_value("timestamp")
 
     totaltime = lap.get_value("total_elapsed_time")
+    if totaltime is None:
+        totaltime = lap.get_value("")
     distance = lap.get_value("total_distance")
     max_speed = lap.get_value("max_speed")  # opt
     calories = lap.get_value("total_calories")
@@ -178,7 +180,8 @@ def add_lap(element, activity, lap):
 
     create_sub_element(lapelem, "TotalTimeSeconds", ff(totaltime))
     create_sub_element(lapelem, "DistanceMeters", ff(distance))
-    create_sub_element(lapelem, "MaximumSpeed", ff(max_speed))
+    if max_speed is not None:
+        create_sub_element(lapelem, "MaximumSpeed", ff(max_speed))
     create_sub_element(lapelem, "Calories", ff(calories))
     # create_sub_element(lapelem, "AverageHeartRateBpm", avg_heart)
     # create_sub_element(lapelem, "MaximumHeartRateBpm", max_heart)
