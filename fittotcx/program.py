@@ -104,6 +104,34 @@ def create_document():
     return document
 
 
+def add_creator(element, device_info):
+    creatorelem = create_sub_element(element, "Creator")
+    creatorelem.set(XML_SCHEMA + "type", "Device_t")
+    if device_info.get_value("product_name"):
+        create_sub_element(creatorelem, "Name", device_info.get_value("product_name"))
+    else:
+        prod, manuf = device_info.get_value("product"), device_info.get_value("manufacturer")
+        if manuf and prod:
+            create_sub_element(creatorelem, "Name", manuf + ' ' + prod)
+        elif prod:
+            create_sub_element(creatorelem, "Name", prod)
+        elif manuf:
+            create_sub_element(creatorelem, "Name", manuf)
+
+    if device_info.get_raw_value("serial_number"):
+        create_sub_element(creatorelem, "UnitID", str(device_info.get_raw_value("serial_number")))
+    if device_info.get_raw_value("product"):
+        create_sub_element(creatorelem, "ProductID", str(device_info.get_raw_value("product")))
+
+    # Garmin Connect always includes two digits in <VersionMinor>
+    v = create_sub_element(creatorelem, "Version")
+    sv = ('%.2f' % (device_info.get_value("software_version") or 0.0)).split('.')
+    create_sub_element(v, 'VersionMajor', sv[0])
+    create_sub_element(v, 'VersionMinor', sv[1])
+    create_sub_element(v, 'BuildMajor', '0')
+    create_sub_element(v, 'BuildMinor', '0')
+
+
 def add_author(document):
     """Add author"""
     author = create_sub_element(document.getroot(), "Author")
@@ -215,6 +243,9 @@ def add_activity(element, activity):
     for lap in activity.get_messages("lap"):
         add_lap(actelem, activity, lap)
 
+    device_info = next(activity.get_messages(name='device_info'))
+    if device_info is not None:
+        add_creator(actelem, device_info)
 
 def convert(filename):
     document = create_document()
