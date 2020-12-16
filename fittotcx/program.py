@@ -136,8 +136,15 @@ def add_author(document):
     """Add author"""
     author = create_sub_element(document.getroot(), "Author")
     author.set(XML_SCHEMA + "type", "Application_t")
-    create_sub_element(author, "Name", "Fit to TCX")
-    create_sub_element(author, "LangID", "EN")
+    create_sub_element(author, "Name", "FIT-to-TCX")
+    create_sub_element(author, "LangID", "en")
+
+    v = create_sub_element(author, "Version")
+    b = create_sub_element(v, "Build")
+    create_sub_element(b, 'VersionMajor', '0')
+    create_sub_element(b, 'VersionMinor', '0')
+    create_sub_element(b, 'BuildMajor', '0')
+    create_sub_element(b, 'BuildMinor', '0')
 
 
 def add_trackpoint(element, trackpoint):
@@ -254,6 +261,7 @@ def convert(filename):
     activity = FitFile(filename)
     activity.parse()
     add_activity(element, activity)
+    add_author(document)
 
     return document
 
