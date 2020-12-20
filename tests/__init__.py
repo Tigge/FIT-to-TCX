@@ -25,11 +25,12 @@ from __future__ import absolute_import, division, print_function
 import fittotcx.program as f2t
 import unittest
 import gzip
+import lxml.etree
 
 
 class Simple(unittest.TestCase):
 
     def test_convert(self):
         converted = f2t.documenttostring(f2t.convert("tests/test.fit"))
-        result = gzip.open("tests/test.tcx.gz").read()
+        result = f2t.documenttostring(lxml.etree.parse(open("tests/test.tcx")))
         self.assertEqual(converted, result)

@@ -41,6 +41,6 @@ jobs:
         coverage run --source=fittotcx setup.py test && coverage report -m
 
     - name: Coveralls
-      uses: coverallsapp/github-action@master
+      uses: AndreMiras/coveralls-python-action@develop
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
