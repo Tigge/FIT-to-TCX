@@ -24,9 +24,6 @@
 
 from __future__ import absolute_import, division, print_function
 
-from time import mktime
-from datetime import datetime
-
 
 def semicircle_to_degrees(semicircles):
     """Convert a number in semicricles to degrees"""

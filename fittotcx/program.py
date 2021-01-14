@@ -30,6 +30,7 @@ import argparse
 import sys
 import lxml.etree
 from fitparse import FitFile, FitParseError
+
 try:
     import importlib.metadata as importlib_metadata
 except ModuleNotFoundError:
@@ -44,17 +45,16 @@ TCD = "{%s}" % TCD_NAMESPACE
 XML_SCHEMA_NAMESPACE = "http://www.w3.org/2001/XMLSchema-instance"
 XML_SCHEMA = "{%s}" % XML_SCHEMA_NAMESPACE
 
-SCHEMA_LOCATION = \
-    "http://www.garmin.com/xmlschemas/ActivityExtension/v2 " + \
-    "http://www.garmin.com/xmlschemas/ActivityExtensionv2.xsd " + \
-    "http://www.garmin.com/xmlschemas/FatCalories/v1 " + \
-    "http://www.garmin.com/xmlschemas/fatcalorieextensionv1.xsd " + \
-    "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 " + \
-    "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd"
+SCHEMA_LOCATION = (
+    "http://www.garmin.com/xmlschemas/ActivityExtension/v2 "
+    + "http://www.garmin.com/xmlschemas/ActivityExtensionv2.xsd "
+    + "http://www.garmin.com/xmlschemas/FatCalories/v1 "
+    + "http://www.garmin.com/xmlschemas/fatcalorieextensionv1.xsd "
+    + "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 "
+    + "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd"
+)
 
-NSMAP = {
-    None: TCD_NAMESPACE,
-    "xsi": XML_SCHEMA_NAMESPACE}
+NSMAP = {None: TCD_NAMESPACE, "xsi": XML_SCHEMA_NAMESPACE}
 
 # FIT to TCX values mapping
 
@@ -67,21 +67,21 @@ LAP_TRIGGER_MAP = {
     "position_waypoint": "Location",
     "position_marked": "Location",
     "session_end": "Manual",
-    "fitness_equipment": "Manual"}
+    "fitness_equipment": "Manual",
+}
 
 INTENSITY_MAP = {
     "active": "Active",
     "warmup": "Active",
     "cooldown": "Active",
-    "rest": "Resting"}
+    "rest": "Resting",
+}
 
-SPORT_MAP = {
-    "running": "Running",
-    "cycling": "Biking"}
+SPORT_MAP = {"running": "Running", "cycling": "Biking"}
 
 
 def ff(number):
-    return '{:.10f}'.format(number).rstrip('0').rstrip('.')
+    return "{:.10f}".format(number).rstrip("0").rstrip(".")
 
 
 def create_element(tag, text=None, namespace=None):
@@ -115,26 +115,32 @@ def add_creator(element, device_info):
     if device_info.get_value("product_name"):
         create_sub_element(creatorelem, "Name", device_info.get_value("product_name"))
     else:
-        prod, manuf = device_info.get_value("product"), device_info.get_value("manufacturer")
+        prod, manuf = device_info.get_value("product"), device_info.get_value(
+            "manufacturer"
+        )
         if manuf and prod:
-            create_sub_element(creatorelem, "Name", manuf + ' ' + prod)
+            create_sub_element(creatorelem, "Name", manuf + " " + prod)
         elif prod:
             create_sub_element(creatorelem, "Name", prod)
         elif manuf:
             create_sub_element(creatorelem, "Name", manuf)
 
     if device_info.get_raw_value("serial_number"):
-        create_sub_element(creatorelem, "UnitID", str(device_info.get_raw_value("serial_number")))
+        create_sub_element(
+            creatorelem, "UnitID", str(device_info.get_raw_value("serial_number"))
+        )
     if device_info.get_raw_value("product"):
-        create_sub_element(creatorelem, "ProductID", str(device_info.get_raw_value("product")))
+        create_sub_element(
+            creatorelem, "ProductID", str(device_info.get_raw_value("product"))
+        )
 
     # Garmin Connect always includes two digits in <VersionMinor>
     v = create_sub_element(creatorelem, "Version")
-    sv = ('%.2f' % (device_info.get_value("software_version") or 0.0)).split('.')
-    create_sub_element(v, 'VersionMajor', sv[0])
-    create_sub_element(v, 'VersionMinor', sv[1])
-    create_sub_element(v, 'BuildMajor', '0')
-    create_sub_element(v, 'BuildMinor', '0')
+    sv = ("%.2f" % (device_info.get_value("software_version") or 0.0)).split(".")
+    create_sub_element(v, "VersionMajor", sv[0])
+    create_sub_element(v, "VersionMinor", sv[1])
+    create_sub_element(v, "BuildMajor", "0")
+    create_sub_element(v, "BuildMinor", "0")
 
 
 def add_author(document):
@@ -148,10 +154,10 @@ def add_author(document):
     b = create_sub_element(v, "Build")
 
     [version_major, version_minor] = importlib_metadata.version("fit-to-tcx").split(".")
-    create_sub_element(b, 'VersionMajor', version_major)
-    create_sub_element(b, 'VersionMinor', version_minor)
-    create_sub_element(b, 'BuildMajor', '0')
-    create_sub_element(b, 'BuildMinor', '0')
+    create_sub_element(b, "VersionMajor", version_major)
+    create_sub_element(b, "VersionMinor", version_minor)
+    create_sub_element(b, "BuildMajor", "0")
+    create_sub_element(b, "BuildMinor", "0")
 
 
 def add_trackpoint(element, trackpoint):
@@ -168,10 +174,12 @@ def add_trackpoint(element, trackpoint):
 
     if pos_lat is not None and pos_long is not None:
         pos = create_sub_element(element, "Position")
-        create_sub_element(pos, "LatitudeDegrees",
-                           ff(unitconvert.semicircle_to_degrees(pos_lat)))
-        create_sub_element(pos, "LongitudeDegrees",
-                           ff(unitconvert.semicircle_to_degrees(pos_long)))
+        create_sub_element(
+            pos, "LatitudeDegrees", ff(unitconvert.semicircle_to_degrees(pos_lat))
+        )
+        create_sub_element(
+            pos, "LongitudeDegrees", ff(unitconvert.semicircle_to_degrees(pos_long))
+        )
 
     if altitude is not None:
         create_sub_element(element, "AltitudeMeters", ff(altitude))
@@ -189,8 +197,7 @@ def add_trackpoint(element, trackpoint):
     if speed is not None:
         exelem = create_sub_element(element, "Extensions")
         tpx = create_sub_element(exelem, "TPX")
-        tpx.set("xmlns",
-                "http://www.garmin.com/xmlschemas/ActivityExtension/v2")
+        tpx.set("xmlns", "http://www.garmin.com/xmlschemas/ActivityExtension/v2")
         tpx.set("CadenceSensor", "Footpod")
         create_sub_element(tpx, "Speed", ff(speed))
 
@@ -242,7 +249,7 @@ def add_lap(element, activity, lap):
 
 
 def add_activity(element, activity):
-    session = next(activity.get_messages(name='session'))
+    session = next(activity.get_messages(name="session"))
 
     # Sport type
     sport = SPORT_MAP.get(session.get_value("sport"), "Other")
@@ -257,9 +264,10 @@ def add_activity(element, activity):
     for lap in activity.get_messages("lap"):
         add_lap(actelem, activity, lap)
 
-    device_info = next(activity.get_messages(name='device_info'))
+    device_info = next(activity.get_messages(name="device_info"))
     if device_info is not None:
         add_creator(actelem, device_info)
+
 
 def convert(filename):
     document = create_document()
@@ -274,21 +282,23 @@ def convert(filename):
 
 
 def documenttostring(document):
-    return lxml.etree.tostring(document.getroot(), pretty_print=True,
-                               xml_declaration=True, encoding="UTF-8")
+    return lxml.etree.tostring(
+        document.getroot(), pretty_print=True, xml_declaration=True, encoding="UTF-8"
+    )
 
 
 def main():
     parser = argparse.ArgumentParser(
-            description="This program takes a FIT file and converts it " +
-                        "into an TCX file and output the result to the " +
-                        "standard output.")
-    parser.add_argument('file', metavar='FILE', type=argparse.FileType('r'))
+        description="This program takes a FIT file and converts it "
+        + "into an TCX file and output the result to the "
+        + "standard output."
+    )
+    parser.add_argument("file", metavar="FILE", type=argparse.FileType("r"))
     args = parser.parse_args()
 
     try:
         document = convert(sys.argv[1])
-        sys.stdout.write(documenttostring(document).decode('utf-8'))
+        sys.stdout.write(documenttostring(document).decode("utf-8"))
         return 0
     except FitParseError as exception:
         sys.stderr.write(str(exception) + "\n")

@@ -29,7 +29,6 @@ import lxml.etree
 
 
 class Simple(unittest.TestCase):
-
     def test_convert(self):
         converted = f2t.documenttostring(f2t.convert("tests/test.fit"))
         result = f2t.documenttostring(lxml.etree.parse(open("tests/test.tcx")))

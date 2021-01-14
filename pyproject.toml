@@ -36,6 +36,10 @@ fittotcx = "fittotcx.program:main"
 requires = ["poetry_core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.black]
+line-length = 88
+target-version = ['py37']
+
 [tool.coverage.run]
 relative_files = true
 
