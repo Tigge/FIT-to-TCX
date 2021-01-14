@@ -1,8 +1,8 @@
 FIT to TCX
 ==========
 
-[![Build Status](https://github.com/Tigge/FIT-to-TCX/workflows/build/badge.svg?branch=master)](https://github.com/Tigge/FIT-to-TCX/actions)
-[![Coveralls branch](https://img.shields.io/coveralls/Tigge/FIT-to-TCX/master.svg)](https://coveralls.io/r/Tigge/FIT-to-TCX?branch=master)
+[![Build Status](https://github.com/Tigge/FIT-to-TCX/workflows/build/badge.svg?branch=main)](https://github.com/Tigge/FIT-to-TCX/actions)
+[![Coveralls branch](https://img.shields.io/coveralls/Tigge/FIT-to-TCX/main.svg)](https://coveralls.io/r/Tigge/FIT-to-TCX?branch=main)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Requirements
