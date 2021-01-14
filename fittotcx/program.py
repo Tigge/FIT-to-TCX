@@ -29,9 +29,14 @@ from __future__ import absolute_import, division, print_function
 import argparse
 import sys
 import lxml.etree
+from fitparse import FitFile, FitParseError
+try:
+    import importlib.metadata as importlib_metadata
+except ModuleNotFoundError:
+    import importlib_metadata
+
 from . import unitconvert
 
-from fitparse import FitFile, FitParseError
 
 TCD_NAMESPACE = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
 TCD = "{%s}" % TCD_NAMESPACE
@@ -141,8 +146,10 @@ def add_author(document):
 
     v = create_sub_element(author, "Version")
     b = create_sub_element(v, "Build")
-    create_sub_element(b, 'VersionMajor', '0')
-    create_sub_element(b, 'VersionMinor', '0')
+
+    [version_major, version_minor] = importlib_metadata.version("fit-to-tcx").split(".")
+    create_sub_element(b, 'VersionMajor', version_major)
+    create_sub_element(b, 'VersionMinor', version_minor)
     create_sub_element(b, 'BuildMajor', '0')
     create_sub_element(b, 'BuildMinor', '0')
 
