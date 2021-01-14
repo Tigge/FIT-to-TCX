@@ -1,2 +1,0 @@
-lxml
-fitparse>=1.0.1

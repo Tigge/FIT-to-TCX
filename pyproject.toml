@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "fit-to-tcx"
+version = "0.2"
+description = ""
+readme = "README.md"
+authors = ["Gustav Tiger <gustav@tiger.name>"]
+license = "MIT"
+repository = "https://github.com/Tigge/FIT-to-TCX"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Healthcare Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8"
+]
+packages = [{include = "fittotcx"}]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+lxml = "^4.6.2"
+fitparse = "^1.2.0"
+importlib-metadata = "^3.4.0"
+
+[tool.poetry.dev-dependencies]
+black = "20.8b1"
+flake8 = "3.8.4"
+coverage = {extras = ["toml"], version = "^5.3.1"}
+
+[tool.poetry.scripts]
+fittotcx = "fittotcx.program:main"
+
+[build-system]
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.run]
+relative_files = true
+

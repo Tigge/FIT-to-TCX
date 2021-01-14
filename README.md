@@ -1,7 +1,7 @@
 FIT to TCX
 ==========
 
-[![Travis branch](https://img.shields.io/travis/Tigge/FIT-to-TCX/master.svg)](https://travis-ci.org/Tigge/FIT-to-TCX)
+[![Build Status](https://github.com/Tigge/FIT-to-TCX/workflows/build/badge.svg?branch=master)](https://github.com/Tigge/FIT-to-TCX/actions)
 [![Coveralls branch](https://img.shields.io/coveralls/Tigge/FIT-to-TCX/master.svg)](https://coveralls.io/r/Tigge/FIT-to-TCX?branch=master)
 
 Requirements
@@ -26,8 +26,7 @@ Requirements
 Installation
 ------------
 
-Run `sudo python setup.py install` to install FIT to TCX. This will install
-an `fittotcx` binary in `/usr/bin` or similar.
+Using [Poetry](https://python-poetry.org/).
 
 Usage
 -----
