@@ -22,8 +22,6 @@
 
 """Unit conversions"""
 
-from __future__ import absolute_import, division, print_function
-
 
 def semicircle_to_degrees(semicircles):
     """Convert a number in semicricles to degrees"""
