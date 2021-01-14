@@ -293,11 +293,11 @@ def main():
         + "into an TCX file and output the result to the "
         + "standard output."
     )
-    parser.add_argument("file", metavar="FILE", type=argparse.FileType("r"))
+    parser.add_argument("file", metavar="FILE", type=argparse.FileType("rb"))
     args = parser.parse_args()
 
     try:
-        document = convert(sys.argv[1])
+        document = convert(args.file)
         sys.stdout.write(documenttostring(document).decode("utf-8"))
         return 0
     except FitParseError as exception:
