@@ -259,7 +259,7 @@ def add_lap(element, activity, lap, epoch_offset=None):
     # Add track points to lap
     trackelem = create_sub_element(lapelem, "Track")
     for trackpoint in activity.get_messages(name="record"):
-        tts = tsz(trackpoint.get_value("timestamp"), epoch_offset)
+        tts, _ = tsz(trackpoint.get_value("timestamp"), epoch_offset)
         if start_time <= tts:
             if end_time is None or tts <= end_time:
                 trackpointelem = create_sub_element(trackelem, "Trackpoint")
@@ -267,7 +267,9 @@ def add_lap(element, activity, lap, epoch_offset=None):
 
 
 def add_activity(element, activity):
-    session = next(activity.get_messages(name="session"))
+    session = next(activity.get_messages(name="session"), None)
+    if session is None:
+        raise FitParseError("FIT file contains no activity session")
 
     # Sport type
     sport = SPORT_MAP.get(session.get_value("sport"), "Other")
