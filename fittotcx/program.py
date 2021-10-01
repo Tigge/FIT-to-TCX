@@ -113,8 +113,8 @@ def add_creator(element, device_info):
     if device_info.get_value("product_name"):
         create_sub_element(creatorelem, "Name", device_info.get_value("product_name"))
     else:
-        prod, manuf = device_info.get_value("product"), device_info.get_value(
-            "manufacturer"
+        prod, manuf = str(device_info.get_value("product")), str(
+            device_info.get_value("manufacturer")
         )
         if manuf and prod:
             create_sub_element(creatorelem, "Name", manuf + " " + prod)
@@ -202,48 +202,58 @@ def add_trackpoint(element, trackpoint):
 
 def add_lap(element, activity, lap):
     start_time = lap.get_value("start_time")
-    end_time = lap.get_value("timestamp")
+    end_time = lap.get_value("timestamp")  # opt
 
-    totaltime = lap.get_value("total_elapsed_time")
+    totaltime = lap.get_value("total_elapsed_time")  # opt
     if totaltime is None:
         totaltime = lap.get_value("")
-    distance = lap.get_value("total_distance")
+    distance = lap.get_value("total_distance")  # opt
     max_speed = lap.get_value("max_speed")  # opt
-    calories = lap.get_value("total_calories")
+    calories = lap.get_value("total_calories")  # opt
 
     # avg_heart  = lap.get_value("avg_heart_rate") #opt
     # max_heart  = lap.get_value("max_heart_rate") #opt
 
-    intensity = INTENSITY_MAP.get(lap.get_value("intensity"), "Resting")
+    intensity = lap.get_value("intensity")  # opt
+    if intensity is not None:
+        intensity = INTENSITY_MAP.get(intensity, "Resting")
 
     cadence = lap.get_value("avg_cadence")  # XXX: or max?
 
-    triggermet = LAP_TRIGGER_MAP.get(lap.get_value("lap_trigger"), "Manual")
+    triggermet = lap.get_value("lap_trigger")
+    if triggermet is not None:
+        triggermet = LAP_TRIGGER_MAP.get(triggermet, "Manual")
 
     # extensions
 
     lapelem = create_sub_element(element, "Lap")
     lapelem.set("StartTime", start_time.isoformat() + "Z")
 
-    create_sub_element(lapelem, "TotalTimeSeconds", ff(totaltime))
-    create_sub_element(lapelem, "DistanceMeters", ff(distance))
+    if totaltime is not None:
+        create_sub_element(lapelem, "TotalTimeSeconds", ff(totaltime))
+    if distance is not None:
+        create_sub_element(lapelem, "DistanceMeters", ff(distance))
     if max_speed is not None:
         create_sub_element(lapelem, "MaximumSpeed", ff(max_speed))
-    create_sub_element(lapelem, "Calories", ff(calories))
+    if calories is not None:
+        create_sub_element(lapelem, "Calories", ff(calories))
     # create_sub_element(lapelem, "AverageHeartRateBpm", avg_heart)
     # create_sub_element(lapelem, "MaximumHeartRateBpm", max_heart)
-    create_sub_element(lapelem, "Intensity", intensity)
+    if intensity is not None:
+        create_sub_element(lapelem, "Intensity", intensity)
     if cadence is not None:
         create_sub_element(lapelem, "Cadence", ff(cadence))
-    create_sub_element(lapelem, "TriggerMethod", triggermet)
+    if triggermet is not None:
+        create_sub_element(lapelem, "TriggerMethod", triggermet)
 
     # Add track points to lap
     trackelem = create_sub_element(lapelem, "Track")
     for trackpoint in activity.get_messages(name="record"):
         tts = trackpoint.get_value("timestamp")
-        if start_time <= tts <= end_time:
-            trackpointelem = create_sub_element(trackelem, "Trackpoint")
-            add_trackpoint(trackpointelem, trackpoint)
+        if start_time <= tts:
+            if end_time is None or tts <= end_time:
+                trackpointelem = create_sub_element(trackelem, "Trackpoint")
+                add_trackpoint(trackpointelem, trackpoint)
 
 
 def add_activity(element, activity):
