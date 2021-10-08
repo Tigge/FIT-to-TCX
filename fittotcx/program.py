@@ -276,17 +276,13 @@ def main():
             description="This program takes a FIT file and converts it " +
                         "into an TCX file and output the result to the " +
                         "standard output.")
-    parser.add_argument('inputfile', metavar='INPUTFILE', nargs=1, type=str)
-    parser.add_argument('outputfile', metavar='OUTPUTFILE', nargs='?', type=str, default=None)
+    parser.add_argument('inputfile', metavar='INPUTFILE', nargs=1, type=argparse.FileType('r'), default=sys.stdin)
+    parser.add_argument('outputfile', metavar='OUTPUTFILE', nargs='?', type=argparse.FileType('w'), default=sys.stdout)
     args = parser.parse_args()
 
     try:
-        document = convert(args.inputfile[0])
-        if args.outputfile:
-            with open(args.outputfile, 'wb') as f:
-                f.write(documenttostring(document))
-        else:
-            print(documenttostring(document).decode('utf-8'))
+        document = convert(args.inputfile)
+        args.outputfile.write(documenttostring(document).decode('utf-8'))
         return 0
     except FitParseError as exception:
         sys.stderr.write(str(exception) + "\n")
