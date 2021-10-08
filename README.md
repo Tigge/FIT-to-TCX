@@ -32,7 +32,7 @@ an `fittotcx` binary in `/usr/bin` or similar.
 Usage
 -----
 
-Usage: `fittotcx FILE`
+Usage: `fittotcx INPUTFILE OUTPUTFILE`
 
 This program takes a FIT file and converts it into an TCX file and output
 the result to the standard output. To save the result to a file, just pipe
