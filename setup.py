@@ -53,9 +53,12 @@ setup(name='fit-to-tcx',
                    'Intended Audience :: End Users/Desktop',
                    'Intended Audience :: Healthcare Industry',
                    'License :: OSI Approved :: MIT License',
-                   'Programming Language :: Python :: 2.7'],
+                   'Programming Language :: Python :: 2.7',
+                   'Programming Language :: Python :: 3.6',
+                   'Programming Language :: Python :: 3.7',
+                   'Programming Language :: Python :: 3.8'],
 
-      dependency_links=['git+https://github.com/dtcooper/python-fitparse.git#egg=fitparse-0.0.1-dev0'],
-      install_requires=['lxml', 'fitparse>=0.0.1-dev0'],
+      dependency_links=['git+https://github.com/dtcooper/python-fitparse.git#egg=fitparse-1.2.0'],
+      install_requires=['lxml', 'fitparse>=1.0.1'],
 
       test_suite='tests')

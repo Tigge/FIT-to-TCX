@@ -104,12 +104,47 @@ def create_document():
     return document
 
 
+def add_creator(element, device_info):
+    creatorelem = create_sub_element(element, "Creator")
+    creatorelem.set(XML_SCHEMA + "type", "Device_t")
+    if device_info.get_value("product_name"):
+        create_sub_element(creatorelem, "Name", device_info.get_value("product_name"))
+    else:
+        prod, manuf = device_info.get_value("product"), device_info.get_value("manufacturer")
+        if manuf and prod:
+            create_sub_element(creatorelem, "Name", manuf + ' ' + prod)
+        elif prod:
+            create_sub_element(creatorelem, "Name", prod)
+        elif manuf:
+            create_sub_element(creatorelem, "Name", manuf)
+
+    if device_info.get_raw_value("serial_number"):
+        create_sub_element(creatorelem, "UnitID", str(device_info.get_raw_value("serial_number")))
+    if device_info.get_raw_value("product"):
+        create_sub_element(creatorelem, "ProductID", str(device_info.get_raw_value("product")))
+
+    # Garmin Connect always includes two digits in <VersionMinor>
+    v = create_sub_element(creatorelem, "Version")
+    sv = ('%.2f' % (device_info.get_value("software_version") or 0.0)).split('.')
+    create_sub_element(v, 'VersionMajor', sv[0])
+    create_sub_element(v, 'VersionMinor', sv[1])
+    create_sub_element(v, 'BuildMajor', '0')
+    create_sub_element(v, 'BuildMinor', '0')
+
+
 def add_author(document):
     """Add author"""
     author = create_sub_element(document.getroot(), "Author")
     author.set(XML_SCHEMA + "type", "Application_t")
-    create_sub_element(author, "Name", "Fit to TCX")
-    create_sub_element(author, "LangID", "EN")
+    create_sub_element(author, "Name", "FIT-to-TCX")
+    create_sub_element(author, "LangID", "en")
+
+    v = create_sub_element(author, "Version")
+    b = create_sub_element(v, "Build")
+    create_sub_element(b, 'VersionMajor', '0')
+    create_sub_element(b, 'VersionMinor', '0')
+    create_sub_element(b, 'BuildMajor', '0')
+    create_sub_element(b, 'BuildMinor', '0')
 
 
 def add_trackpoint(element, trackpoint):
@@ -158,6 +193,8 @@ def add_lap(element, activity, lap):
     end_time = lap.get_value("timestamp")
 
     totaltime = lap.get_value("total_elapsed_time")
+    if totaltime is None:
+        totaltime = lap.get_value("")
     distance = lap.get_value("total_distance")
     max_speed = lap.get_value("max_speed")  # opt
     calories = lap.get_value("total_calories")
@@ -178,7 +215,8 @@ def add_lap(element, activity, lap):
 
     create_sub_element(lapelem, "TotalTimeSeconds", ff(totaltime))
     create_sub_element(lapelem, "DistanceMeters", ff(distance))
-    create_sub_element(lapelem, "MaximumSpeed", ff(max_speed))
+    if max_speed is not None:
+        create_sub_element(lapelem, "MaximumSpeed", ff(max_speed))
     create_sub_element(lapelem, "Calories", ff(calories))
     # create_sub_element(lapelem, "AverageHeartRateBpm", avg_heart)
     # create_sub_element(lapelem, "MaximumHeartRateBpm", max_heart)
@@ -212,6 +250,9 @@ def add_activity(element, activity):
     for lap in activity.get_messages("lap"):
         add_lap(actelem, activity, lap)
 
+    device_info = next(activity.get_messages(name='device_info'))
+    if device_info is not None:
+        add_creator(actelem, device_info)
 
 def convert(filename):
     document = create_document()
@@ -220,6 +261,7 @@ def convert(filename):
     activity = FitFile(filename)
     activity.parse()
     add_activity(element, activity)
+    add_author(document)
 
     return document
 
