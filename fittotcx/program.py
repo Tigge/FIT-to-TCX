@@ -117,30 +117,27 @@ def create_document():
     return document
 
 
-def add_creator(element, device_info):
+def add_creator(element, device_info, creator_overrides=None):
+    if creator_overrides is None:
+        creator_overrides = {}
     creatorelem = create_sub_element(element, "Creator")
     creatorelem.set(XML_SCHEMA + "type", "Device_t")
-    if device_info.get_value("product_name"):
-        create_sub_element(creatorelem, "Name", device_info.get_value("product_name"))
-    else:
-        prod, manuf = str(device_info.get_value("product")), str(
-            device_info.get_value("manufacturer")
-        )
-        if manuf and prod:
-            create_sub_element(creatorelem, "Name", manuf + " " + prod)
-        elif prod:
-            create_sub_element(creatorelem, "Name", prod)
-        elif manuf:
-            create_sub_element(creatorelem, "Name", manuf)
 
-    if device_info.get_raw_value("serial_number"):
-        create_sub_element(
-            creatorelem, "UnitID", str(device_info.get_raw_value("serial_number"))
-        )
-    if device_info.get_raw_value("product"):
-        create_sub_element(
-            creatorelem, "ProductID", str(device_info.get_raw_value("product"))
-        )
+    product_name = (
+        creator_overrides.get("product_name") or
+        device_info.get_value("product_name") or
+        ' '.join(str(device_info.get_value(n)) for n in ("manufacturer", "product") if device_info.get_value(n))
+    )
+    if product_name:
+        create_sub_element(creatorelem, "Name", str(product_name))
+
+    serial_number = creator_overrides.get("serial_number") or device_info.get_raw_value("serial_number")
+    if serial_number:
+        create_sub_element(creatorelem, "UnitID", str(serial_number))
+
+    product_id = creator_overrides.get("product") or device_info.get_raw_value("product")
+    if product_id:
+        create_sub_element(creatorelem, "ProductID", str(product_id))
 
     # Garmin Connect always includes two digits in <VersionMinor>
     v = create_sub_element(creatorelem, "Version")
@@ -266,7 +263,7 @@ def add_lap(element, activity, lap, epoch_offset=None):
                 add_trackpoint(trackpointelem, trackpoint, epoch_offset)
 
 
-def add_activity(element, activity):
+def add_activity(element, activity, creator_overrides=None):
     session = next(activity.get_messages(name="session"), None)
     if session is None:
         raise FitParseError("FIT file contains no activity session")
@@ -299,16 +296,16 @@ def add_activity(element, activity):
 
     device_info = next(activity.get_messages(name="device_info"), None)
     if device_info is not None:
-        add_creator(actelem, device_info)
+        add_creator(actelem, device_info, creator_overrides)
 
 
-def convert(filename):
+def convert(filename, creator_overrides=None):
     document = create_document()
     element = create_sub_element(document.getroot(), "Activities")
 
     activity = FitFile(filename)
     activity.parse()
-    add_activity(element, activity)
+    add_activity(element, activity, creator_overrides)
     add_author(document)
 
     return document
@@ -327,10 +324,22 @@ def main():
         + "standard output."
     )
     parser.add_argument("file", metavar="FILE", type=argparse.FileType("rb"))
+    group = parser.add_argument_group("Device identification",
+                                      description="Set or override device identifiers.")
+    group.add_argument("-S", "--serial-number", type=lambda n: int(n, 0),
+                       help="Set or override device serial number (prefix with 0x for hexadecimal)")
+    group.add_argument("-P", "--product-name", help="Set or override product name")
+    group.add_argument("-I", "--product-id", type=int, help="Set or override numeric product ID")
     args = parser.parse_args()
 
+    creator_overrides = dict(
+        serial_number=args.serial_number,
+        product_name=args.product_name,
+        product=args.product_id,
+    )
+
     try:
-        document = convert(args.file)
+        document = convert(args.file, creator_overrides)
         sys.stdout.write(documenttostring(document).decode("utf-8"))
         return 0
     except FitParseError as exception:
