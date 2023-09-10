@@ -117,7 +117,7 @@ def add_creator(element, device_info):
             "manufacturer"
         )
         if manuf and prod:
-            create_sub_element(creatorelem, "Name", manuf + " " + prod)
+            create_sub_element(creatorelem, "Name", str(manuf) + " " + str(prod))
         elif prod:
             create_sub_element(creatorelem, "Name", prod)
         elif manuf:
@@ -125,7 +125,7 @@ def add_creator(element, device_info):
 
     if device_info.get_raw_value("serial_number"):
         create_sub_element(
-            creatorelem, "UnitID", str(device_info.get_raw_value("serial_number"))
+            creatorelem, "UnitId", str(device_info.get_raw_value("serial_number"))
         )
     if device_info.get_raw_value("product"):
         create_sub_element(
@@ -146,16 +146,18 @@ def add_author(document):
     author = create_sub_element(document.getroot(), "Author")
     author.set(XML_SCHEMA + "type", "Application_t")
     create_sub_element(author, "Name", "FIT-to-TCX")
-    create_sub_element(author, "LangID", "en")
 
-    v = create_sub_element(author, "Version")
-    b = create_sub_element(v, "Build")
+    b = create_sub_element(author, "Build")
+    v = create_sub_element(b, "Version")
 
     [version_major, version_minor] = importlib_metadata.version("fit-to-tcx").split(".")
-    create_sub_element(b, "VersionMajor", version_major)
-    create_sub_element(b, "VersionMinor", version_minor)
-    create_sub_element(b, "BuildMajor", "0")
-    create_sub_element(b, "BuildMinor", "0")
+    create_sub_element(v, "VersionMajor", version_major)
+    create_sub_element(v, "VersionMinor", version_minor)
+    create_sub_element(v, "BuildMajor", "0")
+    create_sub_element(v, "BuildMinor", "0")
+
+    create_sub_element(author, "LangID", "EN")
+    create_sub_element(author, "PartNumber", "000-00000-00")
 
 
 def add_trackpoint(element, trackpoint):
