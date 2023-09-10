@@ -28876,7 +28876,7 @@
       </Lap>
       <Creator xsi:type="Device_t">
         <Name>garmin fr610</Name>
-        <UnitID>3831917292</UnitID>
+        <UnitId>3831917292</UnitId>
         <ProductID>1345</ProductID>
         <Version>
           <VersionMajor>2</VersionMajor>
@@ -28889,14 +28889,15 @@
   </Activities>
   <Author xsi:type="Application_t">
     <Name>FIT-to-TCX</Name>
-    <LangID>en</LangID>
-    <Version>
-      <Build>
+    <Build>
+      <Version>
         <VersionMajor>0</VersionMajor>
         <VersionMinor>2</VersionMinor>
         <BuildMajor>0</BuildMajor>
         <BuildMinor>0</BuildMinor>
-      </Build>
-    </Version>
+      </Version>
+    </Build>
+    <LangID>EN</LangID>
+    <PartNumber>000-00000-00</PartNumber>
   </Author>
 </TrainingCenterDatabase>
