@@ -27,6 +27,7 @@
 import argparse
 import sys
 import lxml.etree
+from datetime import datetime
 from fitparse import FitFile, FitParseError
 
 try:
@@ -82,6 +83,15 @@ def ff(number):
     return "{:.10f}".format(number).rstrip("0").rstrip(".")
 
 
+def tsz(number_or_datetime, epoch_offset):
+    if number_or_datetime is None:
+        return None, ""
+    elif isinstance(number_or_datetime, int):
+        return datetime.fromtimestamp(number_or_datetime + epoch_offset), ""
+    else:
+        return number_or_datetime, "Z"
+
+
 def create_element(tag, text=None, namespace=None):
     namespace = NSMAP[namespace]
     tag = "{%s}%s" % (namespace, tag)
@@ -113,8 +123,8 @@ def add_creator(element, device_info):
     if device_info.get_value("product_name"):
         create_sub_element(creatorelem, "Name", device_info.get_value("product_name"))
     else:
-        prod, manuf = device_info.get_value("product"), device_info.get_value(
-            "manufacturer"
+        prod, manuf = str(device_info.get_value("product")), str(
+            device_info.get_value("manufacturer")
         )
         if manuf and prod:
             create_sub_element(creatorelem, "Name", str(manuf) + " " + str(prod))
@@ -160,8 +170,8 @@ def add_author(document):
     create_sub_element(author, "PartNumber", "000-00000-00")
 
 
-def add_trackpoint(element, trackpoint):
-    timestamp = trackpoint.get_value("timestamp")
+def add_trackpoint(element, trackpoint, epoch_offset=None):
+    timestamp, zone = tsz(trackpoint.get_value("timestamp"), epoch_offset)
     pos_lat = trackpoint.get_value("position_lat")
     pos_long = trackpoint.get_value("position_long")
     distance = trackpoint.get_value("distance")
@@ -170,7 +180,7 @@ def add_trackpoint(element, trackpoint):
     heart_rate = trackpoint.get_value("heart_rate")
     cadence = trackpoint.get_value("cadence")
 
-    create_sub_element(element, "Time", timestamp.isoformat() + "Z")
+    create_sub_element(element, "Time", timestamp.isoformat() + zone)
 
     if pos_lat is not None and pos_long is not None:
         pos = create_sub_element(element, "Position")
@@ -202,69 +212,94 @@ def add_trackpoint(element, trackpoint):
         create_sub_element(tpx, "Speed", ff(speed))
 
 
-def add_lap(element, activity, lap):
-    start_time = lap.get_value("start_time")
-    end_time = lap.get_value("timestamp")
+def add_lap(element, activity, lap, epoch_offset=None):
+    start_time, zone = tsz(lap.get_value("start_time"), epoch_offset)
+    end_time, _ = tsz(lap.get_value("timestamp"), epoch_offset)  # opt
 
-    totaltime = lap.get_value("total_elapsed_time")
+    totaltime = lap.get_value("total_elapsed_time")  # opt
     if totaltime is None:
         totaltime = lap.get_value("")
-    distance = lap.get_value("total_distance")
+    distance = lap.get_value("total_distance")  # opt
     max_speed = lap.get_value("max_speed")  # opt
-    calories = lap.get_value("total_calories")
+    calories = lap.get_value("total_calories")  # opt
 
     # avg_heart  = lap.get_value("avg_heart_rate") #opt
     # max_heart  = lap.get_value("max_heart_rate") #opt
 
-    intensity = INTENSITY_MAP.get(lap.get_value("intensity"), "Resting")
+    intensity = lap.get_value("intensity")  # opt
+    if intensity is not None:
+        intensity = INTENSITY_MAP.get(intensity, "Resting")
 
     cadence = lap.get_value("avg_cadence")  # XXX: or max?
 
-    triggermet = LAP_TRIGGER_MAP.get(lap.get_value("lap_trigger"), "Manual")
+    triggermet = lap.get_value("lap_trigger")
+    if triggermet is not None:
+        triggermet = LAP_TRIGGER_MAP.get(triggermet, "Manual")
 
     # extensions
 
     lapelem = create_sub_element(element, "Lap")
-    lapelem.set("StartTime", start_time.isoformat() + "Z")
+    lapelem.set("StartTime", start_time.isoformat() + zone)
 
-    create_sub_element(lapelem, "TotalTimeSeconds", ff(totaltime))
-    create_sub_element(lapelem, "DistanceMeters", ff(distance))
+    if totaltime is not None:
+        create_sub_element(lapelem, "TotalTimeSeconds", ff(totaltime))
+    if distance is not None:
+        create_sub_element(lapelem, "DistanceMeters", ff(distance))
     if max_speed is not None:
         create_sub_element(lapelem, "MaximumSpeed", ff(max_speed))
-    create_sub_element(lapelem, "Calories", ff(calories))
+    if calories is not None:
+        create_sub_element(lapelem, "Calories", ff(calories))
     # create_sub_element(lapelem, "AverageHeartRateBpm", avg_heart)
     # create_sub_element(lapelem, "MaximumHeartRateBpm", max_heart)
-    create_sub_element(lapelem, "Intensity", intensity)
+    if intensity is not None:
+        create_sub_element(lapelem, "Intensity", intensity)
     if cadence is not None:
         create_sub_element(lapelem, "Cadence", ff(cadence))
-    create_sub_element(lapelem, "TriggerMethod", triggermet)
+    if triggermet is not None:
+        create_sub_element(lapelem, "TriggerMethod", triggermet)
 
     # Add track points to lap
     trackelem = create_sub_element(lapelem, "Track")
     for trackpoint in activity.get_messages(name="record"):
-        tts = trackpoint.get_value("timestamp")
-        if start_time <= tts <= end_time:
-            trackpointelem = create_sub_element(trackelem, "Trackpoint")
-            add_trackpoint(trackpointelem, trackpoint)
+        tts, _ = tsz(trackpoint.get_value("timestamp"), epoch_offset)
+        if start_time <= tts:
+            if end_time is None or tts <= end_time:
+                trackpointelem = create_sub_element(trackelem, "Trackpoint")
+                add_trackpoint(trackpointelem, trackpoint, epoch_offset)
 
 
 def add_activity(element, activity):
-    session = next(activity.get_messages(name="session"))
+    session = next(activity.get_messages(name="session"), None)
+    if session is None:
+        raise FitParseError("FIT file contains no activity session")
 
     # Sport type
     sport = SPORT_MAP.get(session.get_value("sport"), "Other")
 
-    # Identity (in UTC)
+    # Identity (along with all other FIT timestamps, normally in UTC)
+    epoch_offset, zone = None, "Z"
     identity = session.get_value("start_time")
+    if isinstance(identity, int):
+        # Try to use activity.local_timestamp as a backup (e.g. for non-GPS activities)
+        act_message = next(activity.get_messages(name="activity"), None)
+        if act_message is None:
+            raise FitParseError("FIT file contains insufficient time information")
+
+        lt = act_message.get_value("local_timestamp")
+        ts = act_message.get_value("timestamp")
+        if not isinstance(lt, datetime) or not isinstance(ts, int):
+            raise FitParseError("FIT file contains insufficient time information")
+        epoch_offset, zone = int(lt.timestamp()) - ts, ""
+        identity = lt
 
     actelem = create_sub_element(element, "Activity")
     actelem.set("Sport", sport)
-    create_sub_element(actelem, "Id", identity.isoformat() + "Z")
+    create_sub_element(actelem, "Id", identity.isoformat() + zone)
 
     for lap in activity.get_messages("lap"):
-        add_lap(actelem, activity, lap)
+        add_lap(actelem, activity, lap, epoch_offset)
 
-    device_info = next(activity.get_messages(name="device_info"))
+    device_info = next(activity.get_messages(name="device_info"), None)
     if device_info is not None:
         add_creator(actelem, device_info)
 

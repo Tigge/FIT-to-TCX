@@ -31,6 +31,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      name: Checkout repository and submodules
+      with:
+        submodules: recursive
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2

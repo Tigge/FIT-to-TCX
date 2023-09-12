@@ -8,7 +8,6 @@
         <DistanceMeters>1000</DistanceMeters>
         <MaximumSpeed>3.449</MaximumSpeed>
         <Calories>32</Calories>
-        <Intensity>Resting</Intensity>
         <TriggerMethod>Distance</TriggerMethod>
         <Track>
           <Trackpoint>
@@ -5815,7 +5814,6 @@
         <DistanceMeters>1000</DistanceMeters>
         <MaximumSpeed>3.24</MaximumSpeed>
         <Calories>93</Calories>
-        <Intensity>Resting</Intensity>
         <TriggerMethod>Distance</TriggerMethod>
         <Track>
           <Trackpoint>
@@ -13022,7 +13020,6 @@
         <DistanceMeters>1000</DistanceMeters>
         <MaximumSpeed>2.92</MaximumSpeed>
         <Calories>109</Calories>
-        <Intensity>Resting</Intensity>
         <TriggerMethod>Distance</TriggerMethod>
         <Track>
           <Trackpoint>
@@ -21821,7 +21818,6 @@
         <DistanceMeters>1000</DistanceMeters>
         <MaximumSpeed>3.047</MaximumSpeed>
         <Calories>107</Calories>
-        <Intensity>Resting</Intensity>
         <TriggerMethod>Distance</TriggerMethod>
         <Track>
           <Trackpoint>
@@ -28495,7 +28491,6 @@
         <DistanceMeters>58.9</DistanceMeters>
         <MaximumSpeed>2.786</MaximumSpeed>
         <Calories>6</Calories>
-        <Intensity>Resting</Intensity>
         <TriggerMethod>Manual</TriggerMethod>
         <Track>
           <Trackpoint>

@@ -24,12 +24,24 @@ from __future__ import absolute_import, division, print_function
 
 import fittotcx.program as f2t
 import unittest
-import gzip
+import glob
 import lxml.etree
+
+from fitparse import FitParseError
 
 
 class Simple(unittest.TestCase):
-    def test_convert(self):
+    def test_convert_check_results(self):
         converted = f2t.documenttostring(f2t.convert("tests/test.fit"))
-        result = f2t.documenttostring(lxml.etree.parse(open("tests/test.tcx")))
+        with open("tests/test.tcx") as tcx:
+            result = f2t.documenttostring(lxml.etree.parse(tcx))
         self.assertEqual(converted, result)
+
+    def test_convert_check_success(self):
+        for fn in glob.glob("python-fitparse/tests/files/*.fit"):
+            with self.subTest(fn):
+                try:
+                    f2t.convert(fn)
+                except FitParseError:
+                    # If fitparse can't parse it, it's not our fault
+                    pass
