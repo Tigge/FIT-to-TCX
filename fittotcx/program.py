@@ -38,6 +38,15 @@ except ModuleNotFoundError:
 from . import unitconvert
 
 
+if sys.version_info < (3, 2):
+    from datetime import timedelta as _timedelta, tzinfo as _tzinfo
+    class utc(_tzinfo):
+        utcoffset = dst = classmethod(lambda dt: _timedelta(0))
+        tzname = classmethod(lambda dt: 'UTC')
+else:
+    from datetime import timezone
+    utc = timezone.utc
+
 TCD_NAMESPACE = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
 TCD = "{%s}" % TCD_NAMESPACE
 
